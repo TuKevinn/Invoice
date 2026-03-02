@@ -5,20 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Invoice Pelunasan</title>
 
-<!-- Library Export -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 body{
-    font-family: "Times New Roman", serif;
-    margin: 20px;
-    background:white;
+    font-family:"Times New Roman", serif;
+    margin:20px;
+    background:#eee;
 }
 
 /* FORM */
 .form-box{
-    background:#f4f4f4;
+    background:#fff;
     padding:15px;
     margin-bottom:20px;
     border:1px solid #ccc;
@@ -27,267 +26,156 @@ body{
     gap:10px;
 }
 
-.form-box input{
+.form-box input, .form-box button{
     padding:8px;
-    flex:1 1 200px;
-}
-
-.form-box button{
-    padding:10px;
     flex:1 1 150px;
-    cursor:pointer;
 }
 
-/* TABLE */
-.table-wrapper{
-    overflow-x:auto;
+/* ===== INVOICE FIX A4 ===== */
+#invoiceArea{
+    width:794px;          /* FIX ukuran A4 */
+    background:white;
+    padding:20px;
+    margin:auto;
 }
 
 table{
     width:100%;
     border-collapse:collapse;
-    min-width:600px;
-    background:white;
 }
 
-td, th{
+td{
     border:1px solid black;
     padding:8px;
     font-size:16px;
 }
 
-.right{
-    text-align:right;
-}
+.right{text-align:right;}
+.bold{font-weight:bold;}
+.total{font-weight:bold;font-size:18px;}
 
-.bold{
-    font-weight:bold;
-}
-
-.total{
-    font-weight:bold;
-    font-size:18px;
-}
-
-/* MOBILE */
-@media (max-width:768px){
-    td, th{
-        font-size:14px;
-        padding:6px;
-    }
-
-    .total{
-        font-size:16px;
+/* HP hanya scroll */
+@media(max-width:820px){
+    #invoiceArea{
+        transform:scale(0.85);
+        transform-origin:top left;
     }
 }
 </style>
 </head>
 <body>
 
-<!-- FORM INPUT -->
 <div class="form-box">
-
 <input type="date" id="tanggal">
 <input type="text" id="villa" placeholder="Nama Villa">
 <input type="text" id="alamat" placeholder="Alamat">
-
 <input type="text" id="barang" placeholder="Nama Barang">
-<input type="number" id="qty" value="1" min="1" placeholder="Qty">
+<input type="number" id="qty" value="1" min="1">
 <input type="number" id="harga" placeholder="Harga">
-
 <button onclick="tambahBarang()">Tambah</button>
 <button onclick="savePDF()">Save PDF</button>
 <button onclick="saveImage()">Save Image</button>
-
 </div>
 
-<!-- INVOICE -->
 <div id="invoiceArea">
-<div class="table-wrapper">
 
 <table>
-
 <tr>
-    <td style="font-size:28px; font-weight:bold;">
-        Wayan Harta <br>
-        <span style="font-size:18px;">+62 858-5650-6126</span>
-    </td>
-    <td style="text-align:right; font-size:20px;">
-        Invoice Pelunasan
-    </td>
+<td style="font-size:28px;font-weight:bold;">
+Wayan Harta <br>
+<span style="font-size:18px;">+62 858-5650-6126</span>
+</td>
+<td class="right" style="font-size:20px;">
+Invoice Pelunasan
+</td>
 </tr>
 
 <tr>
-    <td>Ditagih kepada</td>
-    <td class="right">Tanggal: <span id="viewTanggal"></span></td>
+<td>Ditagih kepada</td>
+<td class="right">Tanggal: <span id="viewTanggal"></span></td>
 </tr>
 
 <tr>
-    <td><span id="viewVilla"></span></td>
-    <td></td>
+<td><span id="viewVilla"></span></td>
+<td></td>
 </tr>
 
 <tr>
-    <td><span id="viewAlamat"></span></td>
-    <td></td>
+<td><span id="viewAlamat"></span></td>
+<td></td>
 </tr>
 
-<tr>
-    <td colspan="2" style="height:20px;"></td>
-</tr>
+<tr><td colspan="2" style="height:20px;"></td></tr>
 
 <tr class="bold">
-    <td>Barang</td>
-    <td class="right">Jumlah</td>
+<td>Barang</td>
+<td class="right">Jumlah</td>
 </tr>
 
 <tbody id="tabelBarang"></tbody>
 
 <tr>
-    <td>
-        Bank BNI : 0583495033 a.n I WAYAN HARTA WIRAWAN
-    </td>
-    <td class="total right">
-        Total: Rp <span id="totalHarga">0</span>
-    </td>
+<td>Bank BNI : 0583495033 a.n I WAYAN HARTA WIRAWAN</td>
+<td class="right total">Total: Rp <span id="totalHarga">0</span></td>
 </tr>
 
 </table>
-
-</div>
 </div>
 
 <script>
+let total=0;
 
-let total = 0;
-
-document.getElementById("tanggal").addEventListener("input", function(){
-    document.getElementById("viewTanggal").innerText = formatTanggal(this.value);
-});
-
-document.getElementById("villa").addEventListener("input", function(){
-    document.getElementById("viewVilla").innerText = this.value;
-});
-
-document.getElementById("alamat").addEventListener("input", function(){
-    document.getElementById("viewAlamat").innerText = this.value;
-});
+tanggal.oninput=()=>viewTanggal.innerText=formatTanggal(tanggal.value);
+villa.oninput=()=>viewVilla.innerText=villa.value;
+alamat.oninput=()=>viewAlamat.innerText=alamat.value;
 
 function tambahBarang(){
+let nama=barang.value;
+let qtyVal=parseInt(qty.value);
+let hargaVal=parseInt(harga.value);
 
-    let nama = document.getElementById("barang").value;
-    let qty = parseInt(document.getElementById("qty").value);
-    let harga = parseInt(document.getElementById("harga").value);
+if(!nama||!qtyVal||!hargaVal){alert("Lengkapi data!");return;}
 
-    if(nama === "" || isNaN(qty) || isNaN(harga)){
-        alert("Lengkapi data barang!");
-        return;
-    }
+let subtotal=qtyVal*hargaVal;
+total+=subtotal;
 
-    let subtotal = qty * harga;
-    total += subtotal;
+tabelBarang.innerHTML+=`
+<tr>
+<td>${nama} (${qtyVal} x Rp ${hargaVal.toLocaleString()})</td>
+<td class="right">Rp ${subtotal.toLocaleString()}</td>
+</tr>`;
 
-    let row = `
-    <tr>
-        <td>${nama} (${qty} x Rp ${harga.toLocaleString()})</td>
-        <td class="right">Rp ${subtotal.toLocaleString()}</td>
-    </tr>
-    `;
-
-    document.getElementById("tabelBarang").innerHTML += row;
-    document.getElementById("totalHarga").innerText = total.toLocaleString();
-
-    document.getElementById("barang").value = "";
-    document.getElementById("harga").value = "";
-    document.getElementById("qty").value = 1;
+totalHarga.innerText=total.toLocaleString();
+barang.value="";harga.value="";qty.value=1;
 }
 
-function formatTanggal(tanggal){
-    const bulan = ["Januari","Februari","Maret","April","Mei","Juni",
-                   "Juli","Agustus","September","Oktober","November","Desember"];
-
-    let t = new Date(tanggal);
-    return t.getDate() + " " + bulan[t.getMonth()] + " " + t.getFullYear();
+function formatTanggal(t){
+const bulan=["Januari","Februari","Maret","April","Mei","Juni",
+"Juli","Agustus","September","Oktober","November","Desember"];
+let d=new Date(t);
+return d.getDate()+" "+bulan[d.getMonth()]+" "+d.getFullYear();
 }
 
 /* SAVE IMAGE */
 function saveImage(){
-    html2canvas(document.querySelector("#invoiceArea"), {
-        scale: 3,
-        useCORS: true
-    }).then(canvas => {
-        let link = document.createElement("a");
-        link.download = "invoice.png";
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-    });
+html2canvas(invoiceArea,{scale:3}).then(canvas=>{
+let link=document.createElement("a");
+link.download="invoice.png";
+link.href=canvas.toDataURL("image/png");
+link.click();
+});
 }
 
-/* SAVE PDF FIX MOBILE */
-function savePDF() {
-
-    const invoice = document.querySelector("#invoiceArea");
-
-    html2canvas(invoice, {
-        scale: 3,
-        useCORS: true
-    }).then(canvas => {
-
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF("p", "mm", "a4");
-
-        const pdfWidth = 210;
-        const pdfHeight = 297;
-
-        const imgWidth = pdfWidth;
-        const pageHeightPx = canvas.width * (pdfHeight / pdfWidth);
-        const imgHeight = canvas.height * imgWidth / canvas.width;
-
-        let heightLeft = canvas.height;
-        let position = 0;
-        let page = 0;
-
-        while (heightLeft > 0) {
-
-            let pageCanvas = document.createElement("canvas");
-            pageCanvas.width = canvas.width;
-            pageCanvas.height = Math.min(pageHeightPx, heightLeft);
-
-            let ctx = pageCanvas.getContext("2d");
-
-            ctx.drawImage(
-                canvas,
-                0,
-                page * pageHeightPx,
-                canvas.width,
-                pageCanvas.height,
-                0,
-                0,
-                canvas.width,
-                pageCanvas.height
-            );
-
-            let imgData = pageCanvas.toDataURL("image/png");
-
-            if (page > 0) pdf.addPage();
-
-            pdf.addImage(
-                imgData,
-                "PNG",
-                0,
-                0,
-                imgWidth,
-                pageCanvas.height * imgWidth / canvas.width
-            );
-
-            heightLeft -= pageHeightPx;
-            page++;
-        }
-
-        pdf.save("invoice.pdf");
-    });
+/* SAVE PDF PERFECT A4 */
+function savePDF(){
+html2canvas(invoiceArea,{scale:3}).then(canvas=>{
+const {jsPDF}=window.jspdf;
+const pdf=new jsPDF("p","mm","a4");
+let img=canvas.toDataURL("image/png");
+pdf.addImage(img,"PNG",0,0,210,canvas.height*210/canvas.width);
+pdf.save("invoice.pdf");
+});
 }
-
 </script>
 
 </body>
