@@ -15,6 +15,7 @@
     --danger: #dc3545;
     --secondary: #6c757d;
     --warning: #fd7e14;
+    --info: #17a2b8;
 }
 
 body {
@@ -118,17 +119,34 @@ td {
 .right { text-align: right; }
 .bold { font-weight: bold; }
 
-.btn-del { 
-    color: var(--danger); 
+/* Action Buttons di Tabel */
+.action-btns {
+    margin-top: 5px;
+    display: flex;
+    gap: 5px;
+}
+
+.btn-table-action {
     cursor: pointer; 
     font-size: 11px; 
     font-weight: bold;
     display: inline-block;
-    margin-top: 4px;
-    border: 1px solid var(--danger);
-    padding: 1px 4px;
+    padding: 2px 6px;
     border-radius: 3px;
+    text-decoration: none;
 }
+
+.btn-del { 
+    color: var(--danger); 
+    border: 1px solid var(--danger);
+}
+.btn-del:hover { background: #fff5f5; }
+
+.btn-edit { 
+    color: var(--info); 
+    border: 1px solid var(--info);
+}
+.btn-edit:hover { background: #f0faff; }
 
 </style>
 </head>
@@ -223,31 +241,39 @@ document.getElementById('villa').oninput = (e) => document.getElementById('viewV
 document.getElementById('alamat').oninput = (e) => document.getElementById('viewAlamat').innerText = e.target.value || "-";
 
 function tambahItem(tipe) {
-    let deskripsi = "";
+    let deskripsiTabel = "";
     let subtotal = 0;
+    
+    // Variabel mentah untuk fungsi edit
+    let namaItem = "";
+    let qtyItem = 0;
+    let hargaItem = 0;
 
     if (tipe === 'barang') {
-        let n = document.getElementById('barang').value;
-        let q = parseInt(document.getElementById('qtyBarang').value);
-        let h = parseInt(document.getElementById('hargaBarang').value);
-        if (!n || isNaN(q) || isNaN(h)) { alert("Lengkapi data barang!"); return; }
+        namaItem = document.getElementById('barang').value;
+        qtyItem = parseInt(document.getElementById('qtyBarang').value);
+        hargaItem = parseInt(document.getElementById('hargaBarang').value);
         
-        deskripsi = `${n} (${q} x Rp ${h.toLocaleString('id-ID')})`;
-        subtotal = q * h;
+        if (!namaItem || isNaN(qtyItem) || isNaN(hargaItem)) { alert("Lengkapi data barang!"); return; }
         
+        deskripsiTabel = `${namaItem} (${qtyItem} x Rp ${hargaItem.toLocaleString('id-ID')})`;
+        subtotal = qtyItem * hargaItem;
+        
+        // Reset input barang
         document.getElementById('barang').value = "";
         document.getElementById('hargaBarang').value = "";
         document.getElementById('qtyBarang').value = 1;
     } else {
-        let p = document.getElementById('pekerjaan').value;
-        let q = parseInt(document.getElementById('qtyKerja').value);
-        let h = parseInt(document.getElementById('hargaKerja').value);
-        if (!p || isNaN(q) || isNaN(h)) { alert("Lengkapi data pekerjaan!"); return; }
+        namaItem = document.getElementById('pekerjaan').value;
+        qtyItem = parseInt(document.getElementById('qtyKerja').value);
+        hargaItem = parseInt(document.getElementById('hargaKerja').value);
         
-        // Menampilkan Qty x Harga Jasa jika Qty > 1
-        deskripsi = (q > 1) ? `JASA: ${p} (${q} unit x Rp ${h.toLocaleString('id-ID')})` : `JASA: ${p}`;
-        subtotal = q * h;
+        if (!namaItem || isNaN(qtyItem) || isNaN(hargaItem)) { alert("Lengkapi data pekerjaan!"); return; }
         
+        deskripsiTabel = (qtyItem > 1) ? `JASA: ${namaItem} (${qtyItem} unit x Rp ${hargaItem.toLocaleString('id-ID')})` : `JASA: ${namaItem}`;
+        subtotal = qtyItem * hargaItem;
+        
+        // Reset input pekerjaan
         document.getElementById('pekerjaan').value = "";
         document.getElementById('qtyKerja').value = 1;
         document.getElementById('hargaKerja').value = "";
@@ -256,11 +282,17 @@ function tambahItem(tipe) {
     total += subtotal;
     const rowId = "row-" + Date.now();
     
+    // Escape kutipan agar tidak merusak HTML string di fungsi edit
+    const safeNama = namaItem.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
     document.getElementById('tabelInvoice').innerHTML += `
     <tr id="${rowId}">
         <td>
-            ${deskripsi} <br>
-            <span class="btn-del no-export" onclick="hapusBaris('${rowId}', ${subtotal})">✕ Hapus</span>
+            <span class="item-descr">${deskripsiTabel}</span> <br>
+            <div class="action-btns no-export">
+                <span class="btn-table-action btn-edit" onclick="editBaris('${rowId}', '${tipe}', '${safeNama}', ${qtyItem}, ${hargaItem}, ${subtotal})">✎ Edit</span>
+                <span class="btn-table-action btn-del" onclick="hapusBaris('${rowId}', ${subtotal})">✕ Hapus</span>
+            </div>
         </td>
         <td class="right">Rp ${subtotal.toLocaleString('id-ID')}</td>
     </tr>`;
@@ -269,12 +301,38 @@ function tambahItem(tipe) {
 }
 
 function hapusBaris(id, sub) {
-    document.getElementById(id).remove();
-    total -= sub;
-    updateTotal();
+    const row = document.getElementById(id);
+    if(row) {
+        row.remove();
+        total -= sub;
+        updateTotal();
+    }
+}
+
+function editBaris(id, tipe, nama, qty, harga, sub) {
+    // 1. Kembalikan data ke form input yang sesuai
+    if (tipe === 'barang') {
+        document.getElementById('barang').value = nama;
+        document.getElementById('qtyBarang').value = qty;
+        document.getElementById('hargaBarang').value = harga;
+        document.getElementById('barang').focus(); // Fokus ke input nama barang
+    } else {
+        document.getElementById('pekerjaan').value = nama;
+        document.getElementById('qtyKerja').value = qty;
+        document.getElementById('hargaKerja').value = harga;
+        document.getElementById('pekerjaan').focus(); // Fokus ke input nama pekerjaan
+    }
+
+    // 2. Hapus baris lama dari tabel dan kurangi total
+    hapusBaris(id, sub);
+    
+    // Opsional: Beri tahu pengguna
+    // alert("Data item dikembalikan ke form di atas untuk diedit.");
 }
 
 function updateTotal() {
+    // Pastikan total tidak negatif karena pembulatan mengambang
+    if (total < 0) total = 0; 
     document.getElementById('totalHarga').innerText = total.toLocaleString('id-ID');
 }
 
@@ -287,16 +345,19 @@ function formatTanggal(t) {
 
 // Fungsi bantu untuk ekspor agar bersih
 function toggleExport(isExporting) {
-    document.querySelectorAll('.no-export').forEach(el => el.style.display = isExporting ? 'none' : 'inline-block');
+    document.querySelectorAll('.no-export').forEach(el => el.style.display = isExporting ? 'none' : 'flex');
     const area = document.getElementById('invoiceArea');
+    // Paksa lebar A4 saat ekspor agar tidak terpotong di HP
     area.style.width = isExporting ? '794px' : '';
 }
 
 function saveImage() {
     toggleExport(true);
-    html2canvas(document.getElementById('invoiceArea'), { scale: 3 }).then(canvas => {
+    // Scale 3 untuk kualitas gambar tinggi
+    html2canvas(document.getElementById('invoiceArea'), { scale: 3, useCORS: true }).then(canvas => {
         let link = document.createElement("a");
-        link.download = `Invoice_${document.getElementById('viewVilla').innerText}.png`;
+        const namaVilla = document.getElementById('viewVilla').innerText.replace(/[^a-z0-9]/gi, '_');
+        link.download = `Invoice_${namaVilla || 'WayanHarta'}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
         toggleExport(false);
@@ -305,7 +366,7 @@ function saveImage() {
 
 function savePDF() {
     toggleExport(true);
-    html2canvas(document.getElementById('invoiceArea'), { scale: 3 }).then(canvas => {
+    html2canvas(document.getElementById('invoiceArea'), { scale: 3, useCORS: true }).then(canvas => {
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF("p", "mm", "a4");
         let img = canvas.toDataURL("image/png");
@@ -313,7 +374,8 @@ function savePDF() {
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
         pdf.addImage(img, "PNG", 0, 0, pdfWidth, pdfHeight);
-        pdf.save(`Invoice_${document.getElementById('viewVilla').innerText}.pdf`);
+        const namaVilla = document.getElementById('viewVilla').innerText.replace(/[^a-z0-9]/gi, '_');
+        pdf.save(`Invoice_${namaVilla || 'WayanHarta'}.pdf`);
         toggleExport(false);
     });
 }
