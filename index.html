@@ -13,6 +13,7 @@
 body{
     font-family: "Times New Roman", serif;
     margin: 20px;
+    background:white;
 }
 
 /* FORM */
@@ -37,7 +38,7 @@ body{
     cursor:pointer;
 }
 
-/* TABLE WRAPPER */
+/* TABLE */
 .table-wrapper{
     overflow-x:auto;
 }
@@ -46,6 +47,7 @@ table{
     width:100%;
     border-collapse:collapse;
     min-width:600px;
+    background:white;
 }
 
 td, th{
@@ -205,30 +207,57 @@ function formatTanggal(tanggal){
                    "Juli","Agustus","September","Oktober","November","Desember"];
 
     let t = new Date(tanggal);
-    return t.getDate() + "/" + bulan[t.getMonth()] + "/" + t.getFullYear();
+    return t.getDate() + " " + bulan[t.getMonth()] + " " + t.getFullYear();
 }
 
 /* SAVE IMAGE */
 function saveImage(){
-    html2canvas(document.querySelector("#invoiceArea")).then(canvas => {
+    html2canvas(document.querySelector("#invoiceArea"), {
+        scale: 3,
+        useCORS: true
+    }).then(canvas => {
         let link = document.createElement("a");
         link.download = "invoice.png";
-        link.href = canvas.toDataURL();
+        link.href = canvas.toDataURL("image/png");
         link.click();
     });
 }
 
-/* SAVE PDF */
-function savePDF(){
-    html2canvas(document.querySelector("#invoiceArea")).then(canvas => {
+/* SAVE PDF FIX MOBILE */
+function savePDF() {
+
+    const invoice = document.querySelector("#invoiceArea");
+
+    html2canvas(invoice, {
+        scale: 3,
+        useCORS: true,
+        scrollY: -window.scrollY
+    }).then(canvas => {
+
         const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF("p","mm","a4");
+        const pdf = new jsPDF("p", "mm", "a4");
 
-        let imgData = canvas.toDataURL("image/png");
-        let imgWidth = 190;
-        let imgHeight = canvas.height * imgWidth / canvas.width;
+        const imgData = canvas.toDataURL("image/png");
 
-        pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+        const pdfWidth = 210;
+        const pdfHeight = 297;
+
+        const imgWidth = pdfWidth;
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
+
+        while (heightLeft > 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+            heightLeft -= pdfHeight;
+        }
+
         pdf.save("invoice.pdf");
     });
 }
