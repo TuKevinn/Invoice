@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoice Pelunasan</title>
+
+<!-- Library Export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{
+    font-family: "Times New Roman", serif;
+    margin: 20px;
+}
+
+/* FORM */
+.form-box{
+    background:#f4f4f4;
+    padding:15px;
+    margin-bottom:20px;
+    border:1px solid #ccc;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+.form-box input{
+    padding:8px;
+    flex:1 1 200px;
+}
+
+.form-box button{
+    padding:10px;
+    flex:1 1 150px;
+    cursor:pointer;
+}
+
+/* TABLE WRAPPER */
+.table-wrapper{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:600px;
+}
+
+td, th{
+    border:1px solid black;
+    padding:8px;
+    font-size:16px;
+}
+
+.right{
+    text-align:right;
+}
+
+.bold{
+    font-weight:bold;
+}
+
+.total{
+    font-weight:bold;
+    font-size:18px;
+}
+
+/* MOBILE */
+@media (max-width:768px){
+    td, th{
+        font-size:14px;
+        padding:6px;
+    }
+
+    .total{
+        font-size:16px;
+    }
+}
+</style>
+</head>
+<body>
+
+<!-- FORM INPUT -->
+<div class="form-box">
+
+<input type="date" id="tanggal">
+<input type="text" id="villa" placeholder="Nama Villa">
+<input type="text" id="alamat" placeholder="Alamat">
+
+<input type="text" id="barang" placeholder="Nama Barang">
+<input type="number" id="qty" value="1" min="1" placeholder="Qty">
+<input type="number" id="harga" placeholder="Harga">
+
+<button onclick="tambahBarang()">Tambah</button>
+<button onclick="savePDF()">Save PDF</button>
+<button onclick="saveImage()">Save Image</button>
+
+</div>
+
+<!-- INVOICE -->
+<div id="invoiceArea">
+<div class="table-wrapper">
+
+<table>
+
+<tr>
+    <td style="font-size:28px; font-weight:bold;">
+        Wayan Harta <br>
+        <span style="font-size:18px;">+62 858-5650-6126</span>
+    </td>
+    <td style="text-align:right; font-size:20px;">
+        Invoice Pelunasan
+    </td>
+</tr>
+
+<tr>
+    <td>Ditagih kepada</td>
+    <td class="right">Tanggal: <span id="viewTanggal"></span></td>
+</tr>
+
+<tr>
+    <td><span id="viewVilla"></span></td>
+    <td></td>
+</tr>
+
+<tr>
+    <td><span id="viewAlamat"></span></td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="2" style="height:20px;"></td>
+</tr>
+
+<tr class="bold">
+    <td>Barang</td>
+    <td class="right">Jumlah</td>
+</tr>
+
+<tbody id="tabelBarang"></tbody>
+
+<tr>
+    <td>
+        Bank BNI : 0583495033 a.n I WAYAN HARTA WIRAWAN
+    </td>
+    <td class="total right">
+        Total: Rp <span id="totalHarga">0</span>
+    </td>
+</tr>
+
+</table>
+
+</div>
+</div>
+
+<script>
+
+let total = 0;
+
+document.getElementById("tanggal").addEventListener("input", function(){
+    document.getElementById("viewTanggal").innerText = formatTanggal(this.value);
+});
+
+document.getElementById("villa").addEventListener("input", function(){
+    document.getElementById("viewVilla").innerText = this.value;
+});
+
+document.getElementById("alamat").addEventListener("input", function(){
+    document.getElementById("viewAlamat").innerText = this.value;
+});
+
+function tambahBarang(){
+
+    let nama = document.getElementById("barang").value;
+    let qty = parseInt(document.getElementById("qty").value);
+    let harga = parseInt(document.getElementById("harga").value);
+
+    if(nama === "" || isNaN(qty) || isNaN(harga)){
+        alert("Lengkapi data barang!");
+        return;
+    }
+
+    let subtotal = qty * harga;
+    total += subtotal;
+
+    let row = `
+    <tr>
+        <td>${nama} (${qty} x Rp ${harga.toLocaleString()})</td>
+        <td class="right">Rp ${subtotal.toLocaleString()}</td>
+    </tr>
+    `;
+
+    document.getElementById("tabelBarang").innerHTML += row;
+    document.getElementById("totalHarga").innerText = total.toLocaleString();
+
+    document.getElementById("barang").value = "";
+    document.getElementById("harga").value = "";
+    document.getElementById("qty").value = 1;
+}
+
+function formatTanggal(tanggal){
+    const bulan = ["Januari","Februari","Maret","April","Mei","Juni",
+                   "Juli","Agustus","September","Oktober","November","Desember"];
+
+    let t = new Date(tanggal);
+    return t.getDate() + "/" + bulan[t.getMonth()] + "/" + t.getFullYear();
+}
+
+/* SAVE IMAGE */
+function saveImage(){
+    html2canvas(document.querySelector("#invoiceArea")).then(canvas => {
+        let link = document.createElement("a");
+        link.download = "invoice.png";
+        link.href = canvas.toDataURL();
+        link.click();
+    });
+}
+
+/* SAVE PDF */
+function savePDF(){
+    html2canvas(document.querySelector("#invoiceArea")).then(canvas => {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF("p","mm","a4");
+
+        let imgData = canvas.toDataURL("image/png");
+        let imgWidth = 190;
+        let imgHeight = canvas.height * imgWidth / canvas.width;
+
+        pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+        pdf.save("invoice.pdf");
+    });
+}
+
+</script>
+
+</body>
+</html>
