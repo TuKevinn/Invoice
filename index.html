@@ -7,31 +7,42 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
       :root {
-        --primary: #007bff;
-        --success: #28a745;
-        --danger: #dc3545;
-        --secondary: #6c757d;
-        --warning: #fd7e14;
-        --info: #17a2b8;
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --dark-slate: #0f172a;
+        --success: #10b981;
+        --danger: #ef4444;
+        --secondary: #64748b;
+        --warning: #f59e0b;
+        --info: #06b6d4;
+        --bg-light: #f8fafc;
+        --border-color: #e2e8f0;
+      }
+
+      * {
+        box-sizing: border-box;
       }
 
       body {
-        font-family: "Times New Roman", serif;
-        margin: 10px;
-        background: #f4f4f4;
-        color: #333;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        margin: 0;
+        padding: 15px;
+        background: #f1f5f9;
+        color: #334155;
+        -webkit-text-size-adjust: 100%;
       }
 
-      /* FORM STYLING */
+      /* FORM STYLING RESPONSIVE */
       .form-box {
-        background: #fff;
-        padding: 20px;
-        margin-bottom: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        background: #ffffff;
+        padding: 24px;
+        margin-bottom: 24px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
         max-width: 800px;
         margin-left: auto;
         margin-right: auto;
@@ -40,11 +51,10 @@
       .input-group {
         display: grid;
         grid-template-columns: 1fr;
-        gap: 10px;
-        margin-bottom: 10px;
+        gap: 12px;
+        margin-bottom: 12px;
       }
 
-      /* Layout Grid untuk Input Berderet */
       @media (min-width: 600px) {
         .header-group {
           grid-template-columns: 1.5fr 1fr 1.5fr;
@@ -55,145 +65,315 @@
       }
 
       input {
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
+        padding: 10px 14px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
         font-size: 14px;
+        font-family: inherit;
         width: 100%;
-        box-sizing: border-box;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+
+      input:focus {
+        border-color: var(--primary);
       }
 
       /* BUTTON STYLING */
       .btn-container {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 5px;
+        gap: 10px;
+        margin-top: 8px;
       }
 
       button {
-        padding: 12px 15px;
+        padding: 11px 16px;
         border: none;
-        border-radius: 5px;
+        border-radius: 6px;
         color: white;
         cursor: pointer;
-        font-weight: bold;
-        flex: 1;
-        transition: background 0.2s;
+        font-weight: 600;
+        flex: 1 1 140px;
+        transition: all 0.2s;
         font-size: 13px;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
+        gap: 6px;
+        -webkit-tap-highlight-color: transparent;
       }
 
-      .btn-add-item {
-        background: var(--success);
-      }
-      .btn-add-work {
-        background: var(--warning);
-      }
-      .btn-pdf {
-        background: var(--primary);
-      }
-      .btn-img {
-        background: var(--secondary);
-      }
+      .btn-add-item { background: var(--success); }
+      .btn-add-work { background: var(--warning); }
+      .btn-pdf { background: var(--primary); }
+      .btn-img { background: var(--secondary); }
 
       button:hover {
-        filter: brightness(90%);
+        opacity: 0.9;
+        transform: translateY(-1px);
       }
 
-      /* INVOICE AREA */
+      /* INVOICE WRAPPER & AREA */
+      .invoice-wrapper {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        overflow-x: auto;
+      }
+
       #invoiceArea {
-        width: 100%;
-        max-width: 794px;
+        width: 794px; /* Standar lebar A4 */
+        min-height: 1123px;
         background: white;
-        padding: 35px;
-        margin: auto;
+        padding: 45px;
+        margin: 0 auto;
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+        position: relative;
         box-sizing: border-box;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
       }
 
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        table-layout: fixed;
+      /* HEADINGS & TEXT INVOICE */
+      .inv-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 2px solid var(--dark-slate);
+        padding-bottom: 20px;
+        margin-bottom: 24px;
       }
 
-      td {
-        border: 1px solid #000;
-        padding: 10px;
-        font-size: 15px;
-        word-wrap: break-word;
+      .company-title {
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--dark-slate);
+        margin: 0 0 6px 0;
       }
 
-      .no-border td {
-        border: none;
+      .company-sub {
+        font-size: 13px;
+        color: #64748b;
+        margin: 2px 0;
       }
-      .bg-light {
-        background: #f9f9f9;
-      }
-      .right {
+
+      .inv-badge {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--dark-slate);
+        letter-spacing: 1px;
         text-align: right;
       }
-      .bold {
-        font-weight: bold;
+
+      .client-card {
+        background: var(--bg-light);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 24px;
+        display: flex;
+        justify-content: space-between;
       }
 
-      /* Action Buttons di Tabel */
+      .client-info p {
+        margin: 3px 0;
+        font-size: 14px;
+      }
+
+      .client-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+        color: #64748b;
+        margin-bottom: 6px;
+      }
+
+      /* TABEL RINCIAN (KHUSUS PERSIS GAMBAR CONTOH) */
+      table.table-items {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 24px;
+        border: 2px solid #000000;
+        font-family: "Times New Roman", Times, serif;
+      }
+
+      table.table-items th {
+        background: #222222;
+        color: #ffffff;
+        padding: 10px 8px;
+        font-weight: bold;
+        font-size: 16px;
+        text-align: left;
+        border: 2px solid #000000;
+      }
+
+      table.table-items td {
+        border: 2px solid #000000;
+        padding: 10px 8px;
+        font-size: 15px;
+        color: #000000;
+        word-wrap: break-word;
+        vertical-align: middle;
+      }
+
+      .center { text-align: center; }
+      .right { text-align: right; }
+      .bold { font-weight: bold; }
+
       .action-btns {
-        margin-top: 5px;
+        margin-top: 6px;
         display: flex;
-        gap: 5px;
+        gap: 6px;
       }
 
       .btn-table-action {
         cursor: pointer;
         font-size: 11px;
-        font-weight: bold;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
         display: inline-block;
-        padding: 2px 6px;
-        border-radius: 3px;
-        text-decoration: none;
+        padding: 3px 8px;
+        border-radius: 4px;
       }
 
       .btn-del {
         color: var(--danger);
-        border: 1px solid var(--danger);
+        background: #fef2f2;
       }
-      .btn-del:hover {
-        background: #fff5f5;
-      }
+      .btn-del:hover { background: #fee2e2; }
 
       .btn-edit {
-        color: var(--info);
-        border: 1px solid var(--info);
+        color: var(--primary);
+        background: #eff6ff;
       }
-      .btn-edit:hover {
-        background: #f0faff;
+      .btn-edit:hover { background: #dbeafe; }
+
+      /* FOOTER PAYMENT & TOTAL */
+      .inv-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding-top: 20px;
+        border-top: 2px solid var(--dark-slate);
+        gap: 20px;
+      }
+
+      .payment-box {
+        flex: 1;
+        max-width: 440px;
+      }
+
+      .payment-title {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 8px;
+        letter-spacing: 0.5px;
+      }
+
+      table.table-payment {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--bg-light);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+
+      table.table-payment th {
+        background: #e2e8f0;
+        color: var(--dark-slate);
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 6px 10px;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      table.table-payment td {
+        padding: 6px 10px;
+        font-size: 12px;
+        color: #334155;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      table.table-payment tr:last-child td {
+        border-bottom: none;
+      }
+
+      .total-box {
+        text-align: right;
+        min-width: 200px;
+      }
+
+      .total-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+      }
+
+      .total-amount {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--danger);
+        margin-top: 4px;
+      }
+
+      /* MODAL LOADING NOTIFIKASI */
+      #loadingOverlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(4px);
+        z-index: 9999;
+        color: white;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+      }
+      .spinner {
+        border: 3px solid rgba(255,255,255,0.2);
+        border-top: 3px solid #fff;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        animation: spin 0.8s linear infinite;
+        margin-bottom: 12px;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
       }
     </style>
   </head>
   <body>
+
+    <!-- Overlay Loading -->
+    <div id="loadingOverlay">
+      <div class="spinner"></div>
+      <div id="loadingText">Memproses Dokumen...</div>
+    </div>
+
     <div class="form-box">
       <div class="input-group header-group">
         <input type="date" id="tanggal" />
-        <input type="text" id="villa" placeholder="Nama Villa" />
+        <input type="text" id="villa" placeholder="Nama Villa / Pembeli" />
         <input type="text" id="alamat" placeholder="Alamat / Lokasi" />
       </div>
 
-      <hr style="border: 0.5px solid #eee; margin: 20px 0" />
+      <hr style="border: none; border-top: 1px solid var(--border-color); margin: 20px 0" />
 
       <div class="input-group item-group">
         <input type="text" id="barang" placeholder="Nama Barang" />
-        <input
-          type="number"
-          id="qtyBarang"
-          value="1"
-          min="1"
-          placeholder="Qty"
-        />
+        <input type="number" id="qtyBarang" value="1" min="1" placeholder="Qty" />
         <input type="number" id="hargaBarang" placeholder="Harga Satuan" />
       </div>
       <div class="btn-container" style="margin-bottom: 20px">
@@ -203,18 +383,8 @@
       </div>
 
       <div class="input-group item-group">
-        <input
-          type="text"
-          id="pekerjaan"
-          placeholder="Jenis Pekerjaan / Jasa"
-        />
-        <input
-          type="number"
-          id="qtyKerja"
-          value="1"
-          min="1"
-          placeholder="Qty/Unit"
-        />
+        <input type="text" id="pekerjaan" placeholder="Jenis Pekerjaan / Jasa" />
+        <input type="number" id="qtyKerja" value="1" min="1" placeholder="Qty/Unit" />
         <input type="number" id="hargaKerja" placeholder="Harga Jasa" />
       </div>
       <div class="btn-container" style="margin-bottom: 25px">
@@ -229,62 +399,75 @@
       </div>
     </div>
 
-    <div id="invoiceArea">
-      <table>
-        <tr class="no-border">
-          <td style="font-size: 26px; font-weight: bold; width: 60%">
-            Wayan Harta <br />
-            <span style="font-size: 16px; font-weight: normal"
-              >Alamat: Jl. Br.Batanduren, Desa Cepaka, Kediri, Tabanan</span
-            ><br />
-            <span style="font-size: 16px; font-weight: normal"
-              >+62 858-5650-6126</span
-            >
-          </td>
-          <td class="right" style="vertical-align: top">
-            <b style="font-size: 22px">INVOICE</b>
-          </td>
-        </tr>
+    <div class="invoice-wrapper">
+      <div id="invoiceArea">
+        <!-- Header Invoice -->
+        <div class="inv-header">
+          <div>
+            <h1 class="company-title">Wayan Harta</h1>
+            <p class="company-sub">Jl. Br. Batanduren, Desa Cepaka, Kediri, Tabanan</p>
+            <p class="company-sub">Telp/WA: +62 858-5650-6126</p>
+          </div>
+          <div class="inv-badge">INVOICE</div>
+        </div>
 
-        <tr>
-          <td class="bg-light">Ditagih kepada:</td>
-          <td class="right bg-light">
-            Tanggal: <span id="viewTanggal">-</span>
-          </td>
-        </tr>
-        <tr>
-          <td><b id="viewVilla">-</b></td>
-          <td></td>
-        </tr>
-        <tr>
-          <td><span id="viewAlamat">-</span></td>
-          <td></td>
-        </tr>
+        <!-- Informasi Klien & Tanggal -->
+        <div class="client-card">
+          <div class="client-info">
+            <div class="client-label">Ditagih Kepada</div>
+            <p><strong><span id="viewVilla">-</span></strong></p>
+            <p><span id="viewAlamat">-</span></p>
+          </div>
+          <div class="client-info" style="text-align: right;">
+            <div class="client-label">Tanggal</div>
+            <p><strong><span id="viewTanggal">-</span></strong></p>
+          </div>
+        </div>
 
-        <tr class="bold" style="background: #333; color: white">
-          <td>Deskripsi Rincian</td>
-          <td class="right" style="width: 35%">Subtotal</td>
-        </tr>
+        <!-- Tabel Rincian -->
+        <table class="table-items">
+          <thead>
+            <tr>
+              <th class="center" style="width: 8%;">No.</th>
+              <th style="width: 57%;">Deskripsi Rincian</th>
+              <th class="right" style="width: 35%;">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody id="tabelInvoice"></tbody>
+        </table>
 
-        <tbody id="tabelInvoice"></tbody>
-
-        <tr>
-          <td style="font-size: 12px; border-top: 2px solid #000">
-            <b>Pembayaran:</b><br />
-            Bank BNI : 0583495033 a.n I WAYAN HARTA WIRAWAN<br />
-            Bank BRI : 740301013521531 a.n I WAYAN HARTA WIRAWAN<br />
-          </td>
-          <td
-            class="right bold"
-            style="font-size: 18px; border-top: 2px solid #000"
-          >
-            Total Akhir:<br />
-            <span style="color: #d9534f"
-              >Rp <span id="totalHarga">0</span></span
-            >
-          </td>
-        </tr>
-      </table>
+        <!-- Footer Payment & Total -->
+        <div class="inv-footer">
+          <div class="payment-box">
+            <div class="payment-title">Metode Pembayaran</div>
+            <table class="table-payment">
+              <thead>
+                <tr>
+                  <th>Bank</th>
+                  <th>No. Rekening</th>
+                  <th>Atas Nama</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>BNI</strong></td>
+                  <td>0583495033</td>
+                  <td>I WAYAN HARTA WIRAWAN</td>
+                </tr>
+                <tr>
+                  <td><strong>BRI</strong></td>
+                  <td>740301013521531</td>
+                  <td>I WAYAN HARTA WIRAWAN</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="total-box">
+            <div class="total-label">Total Akhir</div>
+            <div class="total-amount">Rp <span id="totalHarga">0</span></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
@@ -292,21 +475,15 @@
 
       // Sync Tampilan Header
       document.getElementById("tanggal").oninput = (e) =>
-        (document.getElementById("viewTanggal").innerText = formatTanggal(
-          e.target.value,
-        ));
+        (document.getElementById("viewTanggal").innerText = formatTanggal(e.target.value));
       document.getElementById("villa").oninput = (e) =>
-        (document.getElementById("viewVilla").innerText =
-          e.target.value || "-");
+        (document.getElementById("viewVilla").innerText = e.target.value || "-");
       document.getElementById("alamat").oninput = (e) =>
-        (document.getElementById("viewAlamat").innerText =
-          e.target.value || "-");
+        (document.getElementById("viewAlamat").innerText = e.target.value || "-");
 
       function tambahItem(tipe) {
         let deskripsiTabel = "";
         let subtotal = 0;
-
-        // Variabel mentah untuk fungsi edit
         let namaItem = "";
         let qtyItem = 0;
         let hargaItem = 0;
@@ -324,7 +501,6 @@
           deskripsiTabel = `${namaItem} (${qtyItem} x Rp ${hargaItem.toLocaleString("id-ID")})`;
           subtotal = qtyItem * hargaItem;
 
-          // Reset input barang
           document.getElementById("barang").value = "";
           document.getElementById("hargaBarang").value = "";
           document.getElementById("qtyBarang").value = 1;
@@ -344,7 +520,6 @@
               : `JASA: ${namaItem}`;
           subtotal = qtyItem * hargaItem;
 
-          // Reset input pekerjaan
           document.getElementById("pekerjaan").value = "";
           document.getElementById("qtyKerja").value = 1;
           document.getElementById("hargaKerja").value = "";
@@ -352,23 +527,37 @@
 
         total += subtotal;
         const rowId = "row-" + Date.now();
-
-        // Escape kutipan agar tidak merusak HTML string di fungsi edit
         const safeNama = namaItem.replace(/'/g, "\\'").replace(/"/g, "&quot;");
 
-        document.getElementById("tabelInvoice").innerHTML += `
-    <tr id="${rowId}">
-        <td>
-            <span class="item-descr">${deskripsiTabel}</span> <br>
-            <div class="action-btns no-export">
-                <span class="btn-table-action btn-edit" onclick="editBaris('${rowId}', '${tipe}', '${safeNama}', ${qtyItem}, ${hargaItem}, ${subtotal})">✎ Edit</span>
-                <span class="btn-table-action btn-del" onclick="hapusBaris('${rowId}', ${subtotal})">✕ Hapus</span>
-            </div>
-        </td>
-        <td class="right">Rp ${subtotal.toLocaleString("id-ID")}</td>
-    </tr>`;
+        const tbody = document.getElementById("tabelInvoice");
+        const newRow = document.createElement("tr");
+        newRow.id = rowId;
+        newRow.setAttribute("data-subtotal", subtotal);
+        newRow.innerHTML = `
+            <td class="center cell-no"></td>
+            <td>
+                <span>${deskripsiTabel}</span>
+                <div class="action-btns no-export">
+                    <span class="btn-table-action btn-edit" onclick="editBaris('${rowId}', '${tipe}', '${safeNama}', ${qtyItem}, ${hargaItem}, ${subtotal})">✎ Edit</span>
+                    <span class="btn-table-action btn-del" onclick="hapusBaris('${rowId}', ${subtotal})">✕ Hapus</span>
+                </div>
+            </td>
+            <td class="right">Rp ${subtotal.toLocaleString("id-ID")}</td>
+        `;
 
+        tbody.appendChild(newRow);
+        updateNomorUrut();
         updateTotal();
+      }
+
+      function updateNomorUrut() {
+        const rows = document.querySelectorAll("#tabelInvoice tr");
+        rows.forEach((row, index) => {
+          const noCell = row.querySelector(".cell-no");
+          if (noCell) {
+            noCell.innerText = index + 1;
+          }
+        });
       }
 
       function hapusBaris(id, sub) {
@@ -376,105 +565,192 @@
         if (row) {
           row.remove();
           total -= sub;
+          updateNomorUrut();
           updateTotal();
         }
       }
 
       function editBaris(id, tipe, nama, qty, harga, sub) {
-        // 1. Kembalikan data ke form input yang sesuai
         if (tipe === "barang") {
           document.getElementById("barang").value = nama;
           document.getElementById("qtyBarang").value = qty;
           document.getElementById("hargaBarang").value = harga;
-          document.getElementById("barang").focus(); // Fokus ke input nama barang
+          document.getElementById("barang").focus();
         } else {
           document.getElementById("pekerjaan").value = nama;
           document.getElementById("qtyKerja").value = qty;
           document.getElementById("hargaKerja").value = harga;
-          document.getElementById("pekerjaan").focus(); // Fokus ke input nama pekerjaan
+          document.getElementById("pekerjaan").focus();
         }
-
-        // 2. Hapus baris lama dari tabel dan kurangi total
         hapusBaris(id, sub);
-
-        // Opsional: Beri tahu pengguna
-        // alert("Data item dikembalikan ke form di atas untuk diedit.");
       }
 
       function updateTotal() {
-        // Pastikan total tidak negatif karena pembulatan mengambang
         if (total < 0) total = 0;
-        document.getElementById("totalHarga").innerText =
-          total.toLocaleString("id-ID");
+        document.getElementById("totalHarga").innerText = total.toLocaleString("id-ID");
       }
 
       function formatTanggal(t) {
         if (!t) return "-";
         const bulan = [
-          "Januari",
-          "Februari",
-          "Maret",
-          "April",
-          "Mei",
-          "Juni",
-          "Juli",
-          "Agustus",
-          "September",
-          "Oktober",
-          "November",
-          "Desember",
+          "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+          "Juli", "Agustus", "September", "Oktober", "November", "Desember"
         ];
         let d = new Date(t);
         return d.getDate() + " " + bulan[d.getMonth()] + " " + d.getFullYear();
       }
 
-      // Fungsi bantu untuk ekspor agar bersih
       function toggleExport(isExporting) {
-        document
-          .querySelectorAll(".no-export")
-          .forEach((el) => (el.style.display = isExporting ? "none" : "flex"));
-        const area = document.getElementById("invoiceArea");
-        // Paksa lebar A4 saat ekspor agar tidak terpotong di HP
-        area.style.width = isExporting ? "794px" : "";
+        document.querySelectorAll(".no-export").forEach((el) => (el.style.display = isExporting ? "none" : "flex"));
+      }
+
+      function showLoading(show) {
+        document.getElementById("loadingOverlay").style.display = show ? "flex" : "none";
       }
 
       function saveImage() {
+        showLoading(true);
         toggleExport(true);
-        // Scale 3 untuk kualitas gambar tinggi
-        html2canvas(document.getElementById("invoiceArea"), {
-          scale: 3,
-          useCORS: true,
-        }).then((canvas) => {
-          let link = document.createElement("a");
-          const namaVilla = document
-            .getElementById("viewVilla")
-            .innerText.replace(/[^a-z0-9]/gi, "_");
-          link.download = `Invoice_${namaVilla || "WayanHarta"}.png`;
-          link.href = canvas.toDataURL("image/png");
-          link.click();
-          toggleExport(false);
-        });
+
+        setTimeout(() => {
+          html2canvas(document.getElementById("invoiceArea"), {
+            scale: 2,
+            useCORS: true,
+            logging: false
+          }).then((canvas) => {
+            const namaVilla = document.getElementById("viewVilla").innerText.replace(/[^a-z0-9]/gi, "_");
+            const filename = `Invoice_${namaVilla || "WayanHarta"}.png`;
+
+            let link = document.createElement("a");
+            link.download = filename;
+            link.href = canvas.toDataURL("image/png");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            toggleExport(false);
+            showLoading(false);
+
+            setTimeout(() => {
+              alert("File gambar berhasil diproses dan diunduh.");
+            }, 300);
+          }).catch((err) => {
+            console.error(err);
+            toggleExport(false);
+            showLoading(false);
+            alert("Gagal membuat gambar invoice.");
+          });
+        }, 100);
       }
 
       function savePDF() {
+        showLoading(true);
         toggleExport(true);
-        html2canvas(document.getElementById("invoiceArea"), {
-          scale: 3,
-          useCORS: true,
-        }).then((canvas) => {
-          const { jsPDF } = window.jspdf;
-          const pdf = new jsPDF("p", "mm", "a4");
-          let img = canvas.toDataURL("image/png");
-          const pdfWidth = pdf.internal.pageSize.getWidth();
-          const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-          pdf.addImage(img, "PNG", 0, 0, pdfWidth, pdfHeight);
-          const namaVilla = document
-            .getElementById("viewVilla")
-            .innerText.replace(/[^a-z0-9]/gi, "_");
-          pdf.save(`Invoice_${namaVilla || "WayanHarta"}.pdf`);
-          toggleExport(false);
-        });
+        setTimeout(() => {
+          const invoiceEl = document.getElementById("invoiceArea");
+
+          html2canvas(invoiceEl, {
+            scale: 2,
+            useCORS: true,
+            logging: false
+          }).then((canvas) => {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF("p", "mm", "a4");
+
+            const pdfWidth = 210;
+            const pdfHeight = 297;
+            const marginY = 15; // Margin atas & bawah halaman PDF (mm)
+            const printableHeightMm = pdfHeight - (marginY * 2);
+
+            const pxPerMm = canvas.width / pdfWidth;
+            const maxPageHeightPx = printableHeightMm * pxPerMm;
+
+            // Kumpulkan koordinat batas bawah elemen (terutama baris tabel & footer)
+            const invoiceRect = invoiceEl.getBoundingClientRect();
+            const elements = invoiceEl.querySelectorAll("tr, .inv-header, .client-card, .inv-footer");
+            
+            let breakPointsPx = [];
+            elements.forEach((el) => {
+              const rect = el.getBoundingClientRect();
+              const bottomPx = (rect.bottom - invoiceRect.top) * (canvas.width / invoiceEl.clientWidth);
+              breakPointsPx.push(bottomPx);
+            });
+            breakPointsPx.sort((a, b) => a - b);
+
+            let currentY = 0;
+            let isFirstPage = true;
+
+            while (currentY < canvas.height) {
+              let targetY = currentY + maxPageHeightPx;
+
+              // Jika belum sampai akhir canvas, cari titik potong paling pas di antara baris/elemen
+              if (targetY < canvas.height) {
+                let safeBreak = currentY;
+                for (let i = 0; i < breakPointsPx.length; i++) {
+                  if (breakPointsPx[i] <= targetY) {
+                    if (breakPointsPx[i] > safeBreak) {
+                      safeBreak = breakPointsPx[i];
+                    }
+                  } else {
+                    break;
+                  }
+                }
+                
+                // Gunakan titik potong terdekat dari baris tabel jika ditemukan
+                if (safeBreak > currentY) {
+                  targetY = safeBreak;
+                }
+              } else {
+                targetY = canvas.height;
+              }
+
+              const pageSliceHeightPx = targetY - currentY;
+
+              // Buat canvas sementara potongan halaman
+              const pageCanvas = document.createElement("canvas");
+              pageCanvas.width = canvas.width;
+              pageCanvas.height = pageSliceHeightPx;
+
+              const ctx = pageCanvas.getContext("2d");
+              ctx.drawImage(
+                canvas,
+                0, currentY, canvas.width, pageSliceHeightPx,
+                0, 0, canvas.width, pageSliceHeightPx
+              );
+
+              const pageImgData = pageCanvas.toDataURL("image/png");
+              const pageImgHeightMm = (pageSliceHeightPx * pdfWidth) / canvas.width;
+
+              if (!isFirstPage) {
+                pdf.addPage();
+              }
+
+              // Tempel gambar terpotong rapi dengan margin atas & bawah
+              pdf.addImage(pageImgData, "PNG", 0, marginY, pdfWidth, pageImgHeightMm);
+
+              currentY = targetY;
+              isFirstPage = false;
+            }
+
+            const namaVilla = document.getElementById("viewVilla").innerText.replace(/[^a-z0-9]/gi, "_");
+            const filename = `Invoice_${namaVilla || "WayanHarta"}.pdf`;
+
+            pdf.save(filename);
+
+            toggleExport(false);
+            showLoading(false);
+
+            setTimeout(() => {
+              alert("File PDF berhasil diproses dan diunduh.");
+            }, 300);
+          }).catch((err) => {
+            console.error(err);
+            toggleExport(false);
+            showLoading(false);
+            alert("Gagal membuat PDF invoice.");
+          });
+        }, 100);
       }
     </script>
   </body>
