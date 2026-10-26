@@ -2,24 +2,19 @@
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Invoice Pelunasan - Wayan Harta</title>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Invoice - Wayan Harta</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
       :root {
         --primary: #2563eb;
-        --primary-dark: #1d4ed8;
         --dark-slate: #0f172a;
         --success: #10b981;
         --danger: #ef4444;
         --secondary: #64748b;
         --warning: #f59e0b;
-        --info: #06b6d4;
-        --bg-light: #f8fafc;
         --border-color: #e2e8f0;
       }
 
@@ -30,17 +25,16 @@
       body {
         font-family: 'Inter', system-ui, -apple-system, sans-serif;
         margin: 0;
-        padding: 15px;
+        padding: 12px;
         background: #f1f5f9;
         color: #334155;
         -webkit-text-size-adjust: 100%;
       }
 
-      /* FORM STYLING RESPONSIVE */
       .form-box {
         background: #ffffff;
-        padding: 24px;
-        margin-bottom: 24px;
+        padding: 18px;
+        margin-bottom: 20px;
         border-radius: 12px;
         box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
         max-width: 800px;
@@ -49,37 +43,40 @@
       }
 
       .input-group {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
         margin-bottom: 12px;
       }
 
       @media (min-width: 600px) {
         .header-group {
+          display: grid;
           grid-template-columns: 1.5fr 1fr 1.5fr;
+          gap: 12px;
         }
         .item-group {
+          display: grid;
           grid-template-columns: 2fr 0.8fr 1.2fr;
+          gap: 12px;
         }
       }
 
       input {
-        padding: 10px 14px;
+        padding: 12px 14px;
         border: 1px solid var(--border-color);
-        border-radius: 6px;
+        border-radius: 8px;
         font-size: 14px;
-        font-family: inherit;
         width: 100%;
         outline: none;
-        transition: border-color 0.2s;
+        background-color: #fff;
+        -webkit-appearance: none;
       }
 
       input:focus {
         border-color: var(--primary);
       }
 
-      /* BUTTON STYLING */
       .btn-container {
         display: flex;
         flex-wrap: wrap;
@@ -88,66 +85,56 @@
       }
 
       button {
-        padding: 11px 16px;
+        padding: 12px 16px;
         border: none;
-        border-radius: 6px;
+        border-radius: 8px;
         color: white;
         cursor: pointer;
         font-weight: 600;
         flex: 1 1 140px;
-        transition: all 0.2s;
-        font-size: 13px;
+        font-size: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 6px;
-        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
       }
 
       .btn-add-item { background: var(--success); }
       .btn-add-work { background: var(--warning); }
-      .btn-pdf { background: var(--primary); }
-      .btn-img { background: var(--secondary); }
+      .btn-print { background: var(--primary); }
 
-      button:hover {
-        opacity: 0.9;
-        transform: translateY(-1px);
-      }
-
-      /* INVOICE WRAPPER & AREA */
       .invoice-wrapper {
         width: 100%;
         max-width: 800px;
         margin: 0 auto;
-        overflow-x: auto;
+        overflow: hidden;
+        padding-bottom: 20px;
       }
 
       #invoiceArea {
-        width: 794px; /* Standar lebar A4 */
-        min-height: 1123px;
+        width: 794px;
         background: white;
         padding: 45px;
         margin: 0 auto;
         box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
-        position: relative;
         box-sizing: border-box;
       }
 
-      /* HEADINGS & TEXT INVOICE */
       .inv-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
         border-bottom: 2px solid var(--dark-slate);
-        padding-bottom: 20px;
-        margin-bottom: 24px;
+        padding-bottom: 16px;
+        margin-bottom: 20px;
       }
 
       .company-title {
         font-size: 26px;
         font-weight: 700;
         color: var(--dark-slate);
-        margin: 0 0 6px 0;
+        margin: 0 0 4px 0;
       }
 
       .company-sub {
@@ -161,15 +148,14 @@
         font-weight: 800;
         color: var(--dark-slate);
         letter-spacing: 1px;
-        text-align: right;
       }
 
       .client-card {
-        background: var(--bg-light);
-        border: 1px solid var(--border-color);
+        background: #f8fafc;
+        border: 2px solid #000000;
         border-radius: 8px;
-        padding: 16px;
-        margin-bottom: 24px;
+        padding: 14px 16px;
+        margin-bottom: 20px;
         display: flex;
         justify-content: space-between;
       }
@@ -177,34 +163,44 @@
       .client-info p {
         margin: 3px 0;
         font-size: 14px;
+        color: #000000;
       }
 
       .client-label {
         font-size: 11px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-weight: 600;
-        color: #64748b;
-        margin-bottom: 6px;
+        font-weight: 700;
+        color: #334155;
+        margin-bottom: 4px;
       }
 
-      /* TABEL RINCIAN (KHUSUS PERSIS GAMBAR CONTOH) */
       table.table-items {
         width: 100%;
+        table-layout: fixed;
         border-collapse: collapse;
-        margin-bottom: 24px;
+        margin-bottom: 20px;
         border: 2px solid #000000;
         font-family: "Times New Roman", Times, serif;
       }
 
+      table.table-items thead {
+        display: table-header-group;
+      }
+
       table.table-items th {
-        background: #222222;
-        color: #ffffff;
+        background-color: #222222 !important;
+        color: #ffffff !important;
         padding: 10px 8px;
         font-weight: bold;
         font-size: 16px;
         text-align: left;
         border: 2px solid #000000;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      table.table-items tr {
+        page-break-inside: avoid !important;
       }
 
       table.table-items td {
@@ -212,16 +208,17 @@
         padding: 10px 8px;
         font-size: 15px;
         color: #000000;
-        word-wrap: break-word;
         vertical-align: middle;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-word;
       }
 
       .center { text-align: center; }
       .right { text-align: right; }
-      .bold { font-weight: bold; }
 
       .action-btns {
-        margin-top: 6px;
+        margin-top: 4px;
         display: flex;
         gap: 6px;
       }
@@ -231,85 +228,43 @@
         font-size: 11px;
         font-weight: 600;
         font-family: 'Inter', sans-serif;
-        display: inline-block;
         padding: 3px 8px;
         border-radius: 4px;
       }
 
-      .btn-del {
-        color: var(--danger);
-        background: #fef2f2;
-      }
-      .btn-del:hover { background: #fee2e2; }
+      .btn-del { color: var(--danger); background: #fef2f2; }
+      .btn-edit { color: var(--primary); background: #eff6ff; }
 
-      .btn-edit {
-        color: var(--primary);
-        background: #eff6ff;
-      }
-      .btn-edit:hover { background: #dbeafe; }
-
-      /* FOOTER PAYMENT & TOTAL */
       .inv-footer {
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;
-        padding-top: 20px;
+        align-items: flex-end;
+        padding-top: 16px;
         border-top: 2px solid var(--dark-slate);
         gap: 20px;
+        page-break-inside: avoid !important;
       }
 
-      .payment-box {
-        flex: 1;
-        max-width: 440px;
-      }
-
-      .payment-title {
+      .payment-simple {
         font-size: 12px;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: #64748b;
-        margin-bottom: 8px;
-        letter-spacing: 0.5px;
+        color: #334155;
+        line-height: 1.6;
       }
 
-      table.table-payment {
-        width: 100%;
-        border-collapse: collapse;
-        background: var(--bg-light);
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        overflow: hidden;
-      }
-
-      table.table-payment th {
-        background: #e2e8f0;
-        color: var(--dark-slate);
+      .payment-simple-title {
         font-size: 11px;
         font-weight: 700;
         text-transform: uppercase;
-        padding: 6px 10px;
-        text-align: left;
-        border-bottom: 1px solid var(--border-color);
-      }
-
-      table.table-payment td {
-        padding: 6px 10px;
-        font-size: 12px;
-        color: #334155;
-        border-bottom: 1px solid var(--border-color);
-      }
-
-      table.table-payment tr:last-child td {
-        border-bottom: none;
+        color: #64748b;
+        margin-bottom: 4px;
       }
 
       .total-box {
         text-align: right;
-        min-width: 200px;
       }
 
       .total-label {
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 600;
         color: #64748b;
         text-transform: uppercase;
@@ -319,49 +274,53 @@
         font-size: 24px;
         font-weight: 700;
         color: var(--danger);
-        margin-top: 4px;
+        margin-top: 2px;
       }
 
-      /* MODAL LOADING NOTIFIKASI */
-      #loadingOverlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(15, 23, 42, 0.7);
-        backdrop-filter: blur(4px);
-        z-index: 9999;
-        color: white;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        font-size: 15px;
-      }
-      .spinner {
-        border: 3px solid rgba(255,255,255,0.2);
-        border-top: 3px solid #fff;
-        border-radius: 50%;
-        width: 36px;
-        height: 36px;
-        animation: spin 0.8s linear infinite;
-        margin-bottom: 12px;
-      }
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+      @media print {
+        @page {
+          size: A4 portrait;
+          margin: 15mm 12mm 15mm 12mm; /* Menjaga margin agar header & footer browser tetap tampil normal */
+        }
+        
+        body {
+          background: #ffffff !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        
+        .form-box, .no-export {
+          display: none !important;
+        }
+        
+        .invoice-wrapper {
+          max-width: 100% !important;
+          overflow: visible !important;
+          height: auto !important;
+        }
+        
+        #invoiceArea {
+          width: 100% !important;
+          transform: none !important;
+          box-shadow: none !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+
+        table.table-items th {
+          background-color: #222222 !important;
+          color: #ffffff !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
       }
     </style>
   </head>
   <body>
 
-    <!-- Overlay Loading -->
-    <div id="loadingOverlay">
-      <div class="spinner"></div>
-      <div id="loadingText">Memproses Dokumen...</div>
-    </div>
-
+    <!-- Form Input Data -->
     <div class="form-box">
       <div class="input-group header-group">
         <input type="date" id="tanggal" />
@@ -369,17 +328,15 @@
         <input type="text" id="alamat" placeholder="Alamat / Lokasi" />
       </div>
 
-      <hr style="border: none; border-top: 1px solid var(--border-color); margin: 20px 0" />
+      <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;" />
 
       <div class="input-group item-group">
         <input type="text" id="barang" placeholder="Nama Barang" />
         <input type="number" id="qtyBarang" value="1" min="1" placeholder="Qty" />
         <input type="number" id="hargaBarang" placeholder="Harga Satuan" />
       </div>
-      <div class="btn-container" style="margin-bottom: 20px">
-        <button class="btn-add-item" onclick="tambahItem('barang')">
-          ✚ Tambah Barang
-        </button>
+      <div class="btn-container" style="margin-bottom: 16px;">
+        <button class="btn-add-item" onclick="tambahItem('barang')">✚ Tambah Barang</button>
       </div>
 
       <div class="input-group item-group">
@@ -387,21 +344,18 @@
         <input type="number" id="qtyKerja" value="1" min="1" placeholder="Qty/Unit" />
         <input type="number" id="hargaKerja" placeholder="Harga Jasa" />
       </div>
-      <div class="btn-container" style="margin-bottom: 25px">
-        <button class="btn-add-work" onclick="tambahItem('pekerjaan')">
-          + Tambah Pekerjaan
-        </button>
+      <div class="btn-container" style="margin-bottom: 20px;">
+        <button class="btn-add-work" onclick="tambahItem('pekerjaan')">+ Tambah Pekerjaan</button>
       </div>
 
       <div class="btn-container">
-        <button class="btn-pdf" onclick="savePDF()">Simpan PDF</button>
-        <button class="btn-img" onclick="saveImage()">Simpan Gambar</button>
+        <button class="btn-print" onclick="cetakInvoice()">🖨 Cetak / Simpan ke PDF</button>
       </div>
     </div>
 
-    <div class="invoice-wrapper">
+    <!-- Preview Invoice -->
+    <div class="invoice-wrapper" id="invoiceScrollWrapper">
       <div id="invoiceArea">
-        <!-- Header Invoice -->
         <div class="inv-header">
           <div>
             <h1 class="company-title">Wayan Harta</h1>
@@ -411,10 +365,9 @@
           <div class="inv-badge">INVOICE</div>
         </div>
 
-        <!-- Informasi Klien & Tanggal -->
         <div class="client-card">
           <div class="client-info">
-            <div class="client-label">Ditagih Kepada</div>
+            <div class="client-label">Ditagih Kepada:</div>
             <p><strong><span id="viewVilla">-</span></strong></p>
             <p><span id="viewAlamat">-</span></p>
           </div>
@@ -424,7 +377,6 @@
           </div>
         </div>
 
-        <!-- Tabel Rincian -->
         <table class="table-items">
           <thead>
             <tr>
@@ -436,31 +388,11 @@
           <tbody id="tabelInvoice"></tbody>
         </table>
 
-        <!-- Footer Payment & Total -->
         <div class="inv-footer">
-          <div class="payment-box">
-            <div class="payment-title">Metode Pembayaran</div>
-            <table class="table-payment">
-              <thead>
-                <tr>
-                  <th>Bank</th>
-                  <th>No. Rekening</th>
-                  <th>Atas Nama</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><strong>BNI</strong></td>
-                  <td>0583495033</td>
-                  <td>I WAYAN HARTA WIRAWAN</td>
-                </tr>
-                <tr>
-                  <td><strong>BRI</strong></td>
-                  <td>740301013521531</td>
-                  <td>I WAYAN HARTA WIRAWAN</td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="payment-simple">
+            <div class="payment-simple-title">Metode Pembayaran</div>
+            <div><strong>BNI:</strong> 0583495033 a.n. I WAYAN HARTA WIRAWAN</div>
+            <div><strong>BRI:</strong> 740301013521531 a.n. I WAYAN HARTA WIRAWAN</div>
           </div>
           <div class="total-box">
             <div class="total-label">Total Akhir</div>
@@ -473,7 +405,26 @@
     <script>
       let total = 0;
 
-      // Sync Tampilan Header
+      function adjustInvoiceScale() {
+        const wrapper = document.getElementById("invoiceScrollWrapper");
+        const area = document.getElementById("invoiceArea");
+        const screenWidth = wrapper.clientWidth;
+        const targetWidth = 794;
+        
+        if (screenWidth < targetWidth) {
+          const scale = screenWidth / targetWidth;
+          area.style.transform = `scale(${scale})`;
+          area.style.transformOrigin = "top left";
+          wrapper.style.height = `${area.offsetHeight * scale}px`;
+        } else {
+          area.style.transform = "none";
+          wrapper.style.height = "auto";
+        }
+      }
+
+      window.addEventListener("resize", adjustInvoiceScale);
+      window.addEventListener("DOMContentLoaded", adjustInvoiceScale);
+
       document.getElementById("tanggal").oninput = (e) =>
         (document.getElementById("viewTanggal").innerText = formatTanggal(e.target.value));
       document.getElementById("villa").oninput = (e) =>
@@ -514,10 +465,9 @@
             return;
           }
 
-          deskripsiTabel =
-            qtyItem > 1
-              ? `JASA: ${namaItem} (${qtyItem} unit x Rp ${hargaItem.toLocaleString("id-ID")})`
-              : `JASA: ${namaItem}`;
+          deskripsiTabel = qtyItem > 1
+            ? `JASA: ${namaItem} (${qtyItem} unit x Rp ${hargaItem.toLocaleString("id-ID")})`
+            : `JASA: ${namaItem}`;
           subtotal = qtyItem * hargaItem;
 
           document.getElementById("pekerjaan").value = "";
@@ -548,15 +498,14 @@
         tbody.appendChild(newRow);
         updateNomorUrut();
         updateTotal();
+        adjustInvoiceScale();
       }
 
       function updateNomorUrut() {
         const rows = document.querySelectorAll("#tabelInvoice tr");
         rows.forEach((row, index) => {
           const noCell = row.querySelector(".cell-no");
-          if (noCell) {
-            noCell.innerText = index + 1;
-          }
+          if (noCell) noCell.innerText = index + 1;
         });
       }
 
@@ -567,6 +516,7 @@
           total -= sub;
           updateNomorUrut();
           updateTotal();
+          adjustInvoiceScale();
         }
       }
 
@@ -592,165 +542,13 @@
 
       function formatTanggal(t) {
         if (!t) return "-";
-        const bulan = [
-          "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-          "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-        ];
+        const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
         let d = new Date(t);
         return d.getDate() + " " + bulan[d.getMonth()] + " " + d.getFullYear();
       }
 
-      function toggleExport(isExporting) {
-        document.querySelectorAll(".no-export").forEach((el) => (el.style.display = isExporting ? "none" : "flex"));
-      }
-
-      function showLoading(show) {
-        document.getElementById("loadingOverlay").style.display = show ? "flex" : "none";
-      }
-
-      function saveImage() {
-        showLoading(true);
-        toggleExport(true);
-
-        setTimeout(() => {
-          html2canvas(document.getElementById("invoiceArea"), {
-            scale: 2,
-            useCORS: true,
-            logging: false
-          }).then((canvas) => {
-            const namaVilla = document.getElementById("viewVilla").innerText.replace(/[^a-z0-9]/gi, "_");
-            const filename = `Invoice_${namaVilla || "WayanHarta"}.png`;
-
-            let link = document.createElement("a");
-            link.download = filename;
-            link.href = canvas.toDataURL("image/png");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            toggleExport(false);
-            showLoading(false);
-
-            setTimeout(() => {
-              alert("File gambar berhasil diproses dan diunduh.");
-            }, 300);
-          }).catch((err) => {
-            console.error(err);
-            toggleExport(false);
-            showLoading(false);
-            alert("Gagal membuat gambar invoice.");
-          });
-        }, 100);
-      }
-
-      function savePDF() {
-        showLoading(true);
-        toggleExport(true);
-
-        setTimeout(() => {
-          const invoiceEl = document.getElementById("invoiceArea");
-
-          html2canvas(invoiceEl, {
-            scale: 2,
-            useCORS: true,
-            logging: false
-          }).then((canvas) => {
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF("p", "mm", "a4");
-
-            const pdfWidth = 210;
-            const pdfHeight = 297;
-            const marginY = 15; // Margin atas & bawah halaman PDF (mm)
-            const printableHeightMm = pdfHeight - (marginY * 2);
-
-            const pxPerMm = canvas.width / pdfWidth;
-            const maxPageHeightPx = printableHeightMm * pxPerMm;
-
-            // Kumpulkan koordinat batas bawah elemen (terutama baris tabel & footer)
-            const invoiceRect = invoiceEl.getBoundingClientRect();
-            const elements = invoiceEl.querySelectorAll("tr, .inv-header, .client-card, .inv-footer");
-            
-            let breakPointsPx = [];
-            elements.forEach((el) => {
-              const rect = el.getBoundingClientRect();
-              const bottomPx = (rect.bottom - invoiceRect.top) * (canvas.width / invoiceEl.clientWidth);
-              breakPointsPx.push(bottomPx);
-            });
-            breakPointsPx.sort((a, b) => a - b);
-
-            let currentY = 0;
-            let isFirstPage = true;
-
-            while (currentY < canvas.height) {
-              let targetY = currentY + maxPageHeightPx;
-
-              // Jika belum sampai akhir canvas, cari titik potong paling pas di antara baris/elemen
-              if (targetY < canvas.height) {
-                let safeBreak = currentY;
-                for (let i = 0; i < breakPointsPx.length; i++) {
-                  if (breakPointsPx[i] <= targetY) {
-                    if (breakPointsPx[i] > safeBreak) {
-                      safeBreak = breakPointsPx[i];
-                    }
-                  } else {
-                    break;
-                  }
-                }
-                
-                // Gunakan titik potong terdekat dari baris tabel jika ditemukan
-                if (safeBreak > currentY) {
-                  targetY = safeBreak;
-                }
-              } else {
-                targetY = canvas.height;
-              }
-
-              const pageSliceHeightPx = targetY - currentY;
-
-              // Buat canvas sementara potongan halaman
-              const pageCanvas = document.createElement("canvas");
-              pageCanvas.width = canvas.width;
-              pageCanvas.height = pageSliceHeightPx;
-
-              const ctx = pageCanvas.getContext("2d");
-              ctx.drawImage(
-                canvas,
-                0, currentY, canvas.width, pageSliceHeightPx,
-                0, 0, canvas.width, pageSliceHeightPx
-              );
-
-              const pageImgData = pageCanvas.toDataURL("image/png");
-              const pageImgHeightMm = (pageSliceHeightPx * pdfWidth) / canvas.width;
-
-              if (!isFirstPage) {
-                pdf.addPage();
-              }
-
-              // Tempel gambar terpotong rapi dengan margin atas & bawah
-              pdf.addImage(pageImgData, "PNG", 0, marginY, pdfWidth, pageImgHeightMm);
-
-              currentY = targetY;
-              isFirstPage = false;
-            }
-
-            const namaVilla = document.getElementById("viewVilla").innerText.replace(/[^a-z0-9]/gi, "_");
-            const filename = `Invoice_${namaVilla || "WayanHarta"}.pdf`;
-
-            pdf.save(filename);
-
-            toggleExport(false);
-            showLoading(false);
-
-            setTimeout(() => {
-              alert("File PDF berhasil diproses dan diunduh.");
-            }, 300);
-          }).catch((err) => {
-            console.error(err);
-            toggleExport(false);
-            showLoading(false);
-            alert("Gagal membuat PDF invoice.");
-          });
-        }, 100);
+      function cetakInvoice() {
+        window.print();
       }
     </script>
   </body>
